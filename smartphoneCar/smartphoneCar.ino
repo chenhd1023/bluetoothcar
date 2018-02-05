@@ -3,83 +3,86 @@ int izqB = 6;
 int derA = 9;
 int derB = 10;
 int vel = 255; // Velocidad de los motores (0-255)
-int estado = 'h'; // inicia detenido
+int estado = 'c'; // inicia detenido
 int delayTime = 2000;
-boolean moving = false;
-//char val;
+boolean infiniteMode = false;
 void setup() {
   Serial.begin(9600); // inicia el puerto serial para comunicacion con el Bluetooth
   pinMode(derA, OUTPUT);
   pinMode(derB, OUTPUT);
   pinMode(izqA, OUTPUT);
   pinMode(izqB, OUTPUT);
-  Serial.println("Car Control!");
 }
+
 void loop() {
+
   if (Serial.available() > 0) { // lee el bluetooth y almacena en estado
     estado = Serial.read();
   }
   if (estado == 'a') { // Forward
-    Serial.println("Forward:");
+    Serial.println(estado);
     analogWrite(derB, 0);
     analogWrite(izqB, 0);
     analogWrite(derA, vel);
     analogWrite(izqA, vel);
-    delay(delayTime);
-    estado = 's';
+    if (!infiniteMode) {
+      delay(delayTime);
+      estado = 'c';
+    }
   }
   if (estado == 'd') { // right
-    Serial.println("Right:");
+    Serial.println(estado);
     analogWrite(derB, vel);
     analogWrite(izqB, 0);
     analogWrite(derA, 0);
     analogWrite(izqA, vel);
-    delay(delayTime);
-    estado = 's';
+    if (!infiniteMode) {
+      delay(delayTime);
+      estado = 'c';
+    }
   }
-  if (estado == 's') { // Stop
-    Serial.println("Stop:");
+  if (estado == 'c') { // Stop
+    Serial.println(estado);
     analogWrite(derB, 0);
     analogWrite(izqB, 0);
     analogWrite(derA, 0);
     analogWrite(izqA, 0);
-    delay(delayTime);
   }
   if (estado == 'b') { // left
-    Serial.println("Left:");
+    Serial.println(estado);
     analogWrite(derB, 0);
     analogWrite(izqB, vel);
     analogWrite(izqA, 0);
     analogWrite(derA, vel);
-    delay(delayTime);
-    estado = 's';
+    if (!infiniteMode) {
+      delay(delayTime);
+      estado = 'c';
+    }
   }
+
   if (estado == 'e') { // Reverse
-    Serial.println("Reverse:");
+    Serial.println(estado);
     analogWrite(derA, 0);
     analogWrite(izqA, 0);
     analogWrite(derB, vel);
     analogWrite(izqB, vel);
-    delay(delayTime);
-    estado = 's';
-  }
-  if (estado == 'f') { 
-    Serial.println("Right:");
-      analogWrite(derB, 200);
-      analogWrite(izqB, 0);
-      analogWrite(derA, vel);
-      analogWrite(izqA, vel);
+    if (!infiniteMode) {
       delay(delayTime);
-    estado = 's';
+      estado = 'c';
+    }
   }
-  if (estado == 'g') { 
-    Serial.println("Left:");
-      analogWrite(derB, 0);
-      analogWrite(izqB, 200);
-      analogWrite(derA, vel);
-      analogWrite(izqA, vel);
-      delay(delayTime);
-    estado = 's';
-  }
+  if (estado == 'f') { // Boton ON se mueve sensando distancia
+    if (infiniteMode == false) {
+      infiniteMode = true;
+      Serial.println("InfiniteMode");
+    }
 
+  }
+  if (estado == 'g') { // Boton OFF, detiene los motores no hace nada
+
+    if (infiniteMode == true) {
+      infiniteMode = false;
+      Serial.println("NoneInfiniteMode");
+    }
+  }
 }
